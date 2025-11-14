@@ -6,6 +6,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable, Optional, TypeVar
 
+import requests
+
 from cta_pipeline.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -180,3 +182,85 @@ class Anonymizer:
     def anonymize_comment_id(self, comment_id: Optional[str]) -> Optional[str]:
         """Anonymize a comment ID."""
         return self.anonymize(comment_id, prefix="comment_")
+
+
+# =============================================================================
+# HTTP Utilities
+# =============================================================================
+
+# Standard headers for Reddit API requests (mimics browser)
+REDDIT_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Connection": "keep-alive",
+    "Host": "www.reddit.com",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
+}
+
+
+def fetch_json(
+    url: str,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    timeout: int = 10,
+) -> Optional[dict]:
+    """
+    Fetch JSON from a URL with error handling.
+
+    Args:
+        url: URL to fetch
+        params: Query parameters
+        headers: HTTP headers (defaults to REDDIT_HEADERS)
+        timeout: Request timeout in seconds
+
+    Returns:
+        JSON response or None on error
+    """
+    if headers is None:
+        headers = REDDIT_HEADERS
+
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=timeout)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.warning(
+                "http_error",
+                url=url,
+                status_code=response.status_code,
+            )
+            return None
+    except requests.RequestException as e:
+        logger.warning("request_exception", url=url, error=str(e))
+        return None
+
+
+# =============================================================================
+# Filter Lists
+# =============================================================================
+
+# Reddit bots and mod accounts to filter out
+REDDIT_BLOCKED_USERS = frozenset([
+    "AmputatorBot",
+    "RemindMeBot",
+    "WikiSummarizerBot",
+    "TweetsInCommentsBot",
+    "sneakpeekbot",
+    "AutoModerator",
+    "chicago-ModTeam",
+    "cta-ModTeam",
+    "ChicagoNWsideMods",
+    "WindyCityChicagoMods",
+])
+
+
+def is_blocked_user(username: str, platform: str = "reddit") -> bool:
+    """Check if a user should be filtered out."""
+    if platform == "reddit":
+        return username in REDDIT_BLOCKED_USERS
+    return False
