@@ -1,5 +1,7 @@
 """Common utilities for data fetching from Reddit and Bluesky."""
 
+import hashlib
+import os
 import time
 from dataclasses import dataclass, field
 from typing import Callable, Optional, TypeVar
@@ -110,3 +112,71 @@ def with_retry(
             delay = min(delay * config.backoff_factor, config.max_delay)
 
     return None
+
+
+# =============================================================================
+# Anonymization
+# =============================================================================
+
+
+class Anonymizer:
+    """
+    Generates consistent anonymous IDs for user data while preserving relationships.
+
+    Uses a salted hash to ensure:
+    - Same input always produces same output (for relationship preservation)
+    - Cannot reverse the hash to get original value
+    - Salt prevents rainbow table attacks
+    """
+
+    def __init__(self, salt: Optional[str] = None):
+        """
+        Initialize anonymizer with a salt.
+
+        Args:
+            salt: Secret salt for hashing. If not provided, generates a random one.
+                  For consistent anonymization across runs, provide the same salt.
+        """
+        self.salt = salt or os.urandom(32).hex()
+        self._cache: dict[str, str] = {}
+
+    def anonymize(self, value: Optional[str], prefix: str = "") -> Optional[str]:
+        """
+        Generate an anonymous ID for a value.
+
+        Args:
+            value: The value to anonymize (e.g., username, post_id)
+            prefix: Optional prefix for the anonymous ID (e.g., "user_", "post_")
+
+        Returns:
+            Anonymous ID or None if input is None/empty
+        """
+        if value is None or value == "":
+            return None
+
+        # Check cache for consistency
+        cache_key = f"{prefix}:{value}"
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        # Generate hash
+        hash_input = f"{self.salt}:{value}".encode("utf-8")
+        hash_digest = hashlib.sha256(hash_input).hexdigest()[:12]
+
+        # Create anonymous ID
+        anon_id = f"{prefix}{hash_digest}" if prefix else hash_digest
+        self._cache[cache_key] = anon_id
+
+        return anon_id
+
+    def anonymize_author(self, author: Optional[str]) -> Optional[str]:
+        """Anonymize an author/username."""
+        return self.anonymize(author, prefix="user_")
+
+    def anonymize_post_id(self, post_id: Optional[str]) -> Optional[str]:
+        """Anonymize a post ID."""
+        return self.anonymize(post_id, prefix="post_")
+
+    def anonymize_comment_id(self, comment_id: Optional[str]) -> Optional[str]:
+        """Anonymize a comment ID."""
+        return self.anonymize(comment_id, prefix="comment_")
