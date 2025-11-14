@@ -2,10 +2,13 @@
 
 import time
 from dataclasses import dataclass, field
+from typing import Callable, Optional, TypeVar
 
 from cta_pipeline.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+T = TypeVar("T")
 
 
 # =============================================================================
@@ -47,3 +50,63 @@ class RateLimiter:
     def increment(self) -> None:
         """Increment the call counter."""
         self._call_count += 1
+
+
+# =============================================================================
+# Retry Logic
+# =============================================================================
+
+
+@dataclass
+class RetryConfig:
+    """Configuration for retry behavior."""
+
+    max_retries: int = 5
+    initial_delay: float = 1.0
+    backoff_factor: float = 2.0
+    max_delay: float = 60.0
+
+
+def with_retry(
+    func: Callable[[], T],
+    config: RetryConfig = None,
+    on_error: Optional[Callable[[Exception, int], None]] = None,
+) -> Optional[T]:
+    """
+    Execute a function with retry logic and exponential backoff.
+
+    Args:
+        func: Function to execute
+        config: Retry configuration
+        on_error: Optional callback for error handling (receives exception and attempt number)
+
+    Returns:
+        Result of function or None if all retries failed
+    """
+    if config is None:
+        config = RetryConfig()
+
+    delay = config.initial_delay
+
+    for attempt in range(1, config.max_retries + 1):
+        try:
+            return func()
+        except Exception as e:
+            if on_error:
+                on_error(e, attempt)
+            else:
+                logger.warning(
+                    "retry_attempt",
+                    attempt=attempt,
+                    max_retries=config.max_retries,
+                    error=str(e),
+                )
+
+            if attempt == config.max_retries:
+                logger.error("all_retries_failed", error=str(e))
+                return None
+
+            time.sleep(delay)
+            delay = min(delay * config.backoff_factor, config.max_delay)
+
+    return None
