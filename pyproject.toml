@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 # Core dependencies for data fetching
 dependencies = [
     "requests>=2.31.0",
+    "atproto>=0.0.46",
     "pandas>=2.0.0",
     "structlog>=23.1.0",
 ]
