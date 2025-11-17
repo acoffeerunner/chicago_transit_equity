@@ -259,8 +259,183 @@ REDDIT_BLOCKED_USERS = frozenset([
 ])
 
 
+# Bluesky news and alert accounts to filter out
+BLUESKY_NEWS_ACCOUNTS = frozenset([
+    "chicago-news.bsky.social",
+    "chicago.thesocial.news",
+    "thenewshub.bsky.social",
+    "some-news.bsky.social",
+    "illinews.bsky.social",
+    "chicagonewsbot.bertshouse.social.ap.brid.gy",
+    "us-news.bsky.social",
+    "worldbytenews.bsky.social",
+    "omalliecatt.news",
+    "wbbmnewsradio.bsky.social",
+    "ntsbnewsroom.govmirrors.com",
+    "ntsbnewsroom.bsky.social",
+    "fox-news.bsky.social",
+    "newsbychinny.bsky.social",
+    "la-news.bsky.social",
+    "worldnewstodayoff.bsky.social",
+    "shaw-local-news.bsky.social",
+    "news-tribune.bsky.social",
+    "morris-herald-news.bsky.social",
+    "newsbeep.bsky.social",
+    "latestnewsx9.bsky.social",
+    "10bmnews.bsky.social",
+    "newsoneofficial.bsky.social",
+    "100yearsagonews.bsky.social",
+    "cavenewstimes.com",
+    "21alivenews.com",
+    "newsnation.bsky.social",
+    "media-news.at.thenote.app",
+    "ctvnews.bsky.social",
+    "nbcnews.com",
+    "abc10news.bsky.social",
+    "scrippsnews.bsky.social",
+    "apnews.com",
+    "victoriannews.com.au",
+    "gotanygoodnews.bsky.social",
+    "chicagonewsbench.bsky.social",
+    "newsjennifer.bsky.social",
+    "meidasherefornews.bsky.social",
+    "virtualnews360.bsky.social",
+    "cbsnewscn.nzcow.com",
+    "wkow27news.bsky.social",
+    "phatznewsroom.bsky.social",
+    "asanews.bsky.social",
+    "oldbaseballnews.bsky.social",
+    "katz.theracket.news",
+    "mprnews.org",
+    "bringmethenews.bsky.social",
+    "wandnews.bsky.social",
+    "southrichmondnews.bsky.social",
+    "newsnetworks.bsky.social",
+    "news-feed.bsky.social",
+    "cybersecuritynews.bsky.social",
+    "nycnewsfeed.bsky.social",
+    "news-flows-ir.bsky.social",
+    "citizenptnewsil.bsky.social",
+    "ksntnews.bsky.social",
+    "newsfedora.bsky.social",
+    "apnews-world-rss.bsky.social",
+    "sketchynews.net",
+    "buffalonews.com",
+    "global-news-2024.bsky.social",
+    "expressnews.com",
+    "veritynews.bsky.social",
+    "american-news.bsky.social",
+    "leehamnews.com",
+    "mexiconews.bsky.social",
+    "newsowl.bsky.social",
+    "newsdesk.flipboard.social.ap.brid.gy",
+    "disappearednews.bsky.social",
+    "tanglenews.bsky.social",
+    "technewslit.journa.host.ap.brid.gy",
+    "technewslit.bsky.social",
+    "atheranews.bsky.social",
+    "newsen.bsky.social",
+    "newworldnewnews.bsky.social",
+    "breathfartnews.bsky.social",
+    "sportsnewstimes.bsky.social",
+    "bitcoincom-news.bsky.social",
+    "hollywood-news.bsky.social",
+    "worldnewstimes.bsky.social",
+    "12sknnews.bsky.social",
+    "citizenptnewsin.bsky.social",
+    "newsdarts.bsky.social",
+    "revnewsstand.bsky.social",
+    "usatopnews.bsky.social",
+    "angrydonkeynews.bsky.social",
+    "therealnews.com",
+    "strikenews.skyfleet.blue",
+    "chi.streetsblog.org",
+    "wttw.bsky.social",
+    "starlinechicago.bsky.social",
+    "chi.nws-bot.us",
+    "noagendamedia.bsky.social",
+    "findsuperdeals.bsky.social",
+    "chicagoconnected.bsky.social",
+    "illinoisicymi.bsky.social",
+    "chicago.suntimes.com",
+    "chicagotribune.com",
+    "chicagocta.bsky.social",
+    "cwbchicago.bsky.social",
+    "theurbanist.org",
+    "ilroadahead.bsky.social",
+    "ilroadnetwork.bsky.social",
+    "ilpolitihub.bsky.social",
+    "cdupoldt.bsky.social",
+    "govpritzker.illinois.gov",
+    "chicagobriefly.bsky.social",
+    "todayheadline.bsky.social",
+    "cbschicago.bsky.social",
+    "chicagorevbooks.bsky.social",
+    "thefaceoff.net",
+    "us-nb.bsky.social",
+    "wgntv.com",
+])
+
+BLUESKY_ALERT_ACCOUNTS = frozenset([
+    "ctaction.org",
+    "ctaalerts.bsky.social",
+    "chicagoalerts.com",
+    "legitctaalerts.bsky.social",
+    "metraalerts.bsky.social",
+    "path-alerts.paxex.aero",
+    "amtrak-status.paxex.aero",
+    "chicagocta.bsky.social",
+    "metraupdates.bsky.social",
+])
+
+# Keywords to filter out (non-CTA transit)
+BLOCKED_KEYWORDS = frozenset(["metra", "amtrak", "bnsf"])
+
+
 def is_blocked_user(username: str, platform: str = "reddit") -> bool:
     """Check if a user should be filtered out."""
     if platform == "reddit":
         return username in REDDIT_BLOCKED_USERS
+    elif platform == "bluesky":
+        return username in BLUESKY_NEWS_ACCOUNTS or username in BLUESKY_ALERT_ACCOUNTS
     return False
+
+
+def contains_blocked_keywords(text: str) -> bool:
+    """Check if text contains blocked keywords (Metra/Amtrak/BNSF)."""
+    if not text:
+        return False
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in BLOCKED_KEYWORDS)
+
+
+# =============================================================================
+# Environment Variable Helpers
+# =============================================================================
+
+
+def get_env_var(name: str, required: bool = True, default: Optional[str] = None) -> Optional[str]:
+    """
+    Get an environment variable with logging.
+
+    Args:
+        name: Environment variable name
+        required: Whether the variable is required
+        default: Default value if not set
+
+    Returns:
+        Value or default
+
+    Raises:
+        ValueError: If required variable is not set
+    """
+    value = os.environ.get(name, default)
+
+    if value is None and required:
+        logger.error("missing_env_var", name=name)
+        raise ValueError(f"Required environment variable {name} is not set")
+
+    if value is not None:
+        logger.debug("env_var_loaded", name=name)
+
+    return value
