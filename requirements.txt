@@ -1,5 +1,38 @@
-# CTA Transit Equity Dashboard - Data Fetching Dependencies
+# CTA Transit Equity Dashboard - All Dependencies
+# For selective installation, use pyproject.toml extras:
+#   pip install ".[fetch]"       # Data fetching only
+#   pip install ".[dashboard]"   # Dashboard only
+#   pip install ".[all]"         # Everything
+
+# Core NLP Pipeline
+datasets>=2.14.0
+sentence-transformers>=2.2.0
+transformers>=4.30.0
+torch>=2.0.0
+pandas>=2.0.0
+pytz>=2023.3
+ftfy>=6.1.0
+emoji>=2.8.0
+tqdm>=4.65.0
+structlog>=23.1.0
+shapely>=2.0.0
+pyproj>=3.0.0
+
+# Data Fetching (Reddit/Bluesky)
 requests>=2.31.0
 atproto>=0.0.46
-pandas>=2.0.0
-structlog>=23.1.0
+
+# Streamlit Dashboard
+streamlit>=1.28.0
+folium>=0.14.0
+streamlit-folium>=0.15.0
+plotly>=5.18.0
+pyarrow>=14.0.0
+
+# Jupyter Notebooks
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipykernel>=6.25.0
+ipywidgets>=8.1.0
+matplotlib>=3.8.0
+python-dotenv>=1.0.0
