@@ -1,0 +1,11 @@
+# Dashboard-only dependencies
+# For full project: pip install -r ../requirements.txt
+# Or: pip install "..[dashboard]" from project root
+
+streamlit>=1.28.0
+pandas>=2.0.0
+folium>=0.14.0
+streamlit-folium>=0.15.0
+plotly>=5.18.0
+pyarrow>=14.0.0
+shapely>=2.0.0
