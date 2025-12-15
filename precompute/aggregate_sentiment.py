@@ -5,42 +5,10 @@ from pathlib import Path
 
 import pandas as pd
 
-
-# =============================================================================
-# Route Mapping Utilities (will be moved to dashboard.utils.route_mapping)
-# =============================================================================
-
-SENTIMENT_TO_GTFS = {
-    # Train lines
-    "red_line": "Red",
-    "blue_line": "Blue",
-    "green_line": "G",
-    "orange_line": "Org",
-    "brown_line": "Brn",
-    "purple_line": "P",
-    "pink_line": "Pink",
-    "yellow_line": "Y",
-}
-
-
-def sentiment_route_to_gtfs(route: str) -> str:
-    """Convert a sentiment data route name to GTFS route_id."""
-    if route in SENTIMENT_TO_GTFS:
-        return SENTIMENT_TO_GTFS[route]
-    if route.startswith("bus_"):
-        return route[4:]
-    return route
-
-
-def get_route_display_name(route: str) -> str:
-    """Get a human-readable display name for a route."""
-    if route.endswith("_line"):
-        color = route.replace("_line", "")
-        return f"{color.capitalize()} Line"
-    if route.startswith("bus_"):
-        number = route[4:]
-        return f"Bus {number}"
-    return route
+from dashboard.utils.route_mapping import (
+    get_route_display_name,
+    sentiment_route_to_gtfs,
+)
 
 
 def load_sentiment_data(data_dir: Path) -> pd.DataFrame:
