@@ -1,1 +1,0 @@
-"""CTA Transit Equity Dashboard."""

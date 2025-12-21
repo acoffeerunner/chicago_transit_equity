@@ -1,0 +1,3 @@
+[submodule "dashboard"]
+	path = dashboard
+	url = https://github.com/acoffeerunner/chicago_transit_equity_dashboard
