@@ -57,6 +57,8 @@ git clone --recursive https://github.com/acoffeerunner/chicago_transit_equity
 cd chicago_transit_equity
 ```
 
+> **Note:** The `--recursive` flag is required because the `dashboard/` directory is a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) hosted in a separate repository. Without this flag, the dashboard directory will be empty. If you already cloned without `--recursive`, run: `git submodule update --init`
+
 ### 2. Install dependencies
 
 ```bash
