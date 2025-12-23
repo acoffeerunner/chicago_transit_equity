@@ -131,7 +131,7 @@ class RedditFetcher:
                 posts_on_page=len(children),
             )
 
-            time.sleep(2)  # Polite delay
+            time.sleep(5)  # Polite delay
 
         logger.info(
             "subreddit_completed",
@@ -295,7 +295,7 @@ class RedditFetcher:
                 total_comments=len(self.comments),
             )
 
-            time.sleep(2)  # Polite delay
+            time.sleep(5)  # Polite delay
 
     def save_output(self) -> None:
         """Save posts and comments to CSV files."""
