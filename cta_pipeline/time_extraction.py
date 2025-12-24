@@ -44,8 +44,11 @@ def get_time_of_day_from_timestamp(timestamp_str: str) -> str:
         Time of day: "morning", "afternoon", "evening", "night", or "unknown"
     """
     try:
+        # Normalize the fractional part of the timestamp
+        normalized_timestamp = _normalize_iso_fraction(timestamp_str)
+        
         # Parse ISO format timestamp
-        dt_utc = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+        dt_utc = datetime.fromisoformat(normalized_timestamp.replace("Z", "+00:00"))
 
         # Convert to Chicago time (Central Time Zone)
         chicago_tz = pytz.timezone(CHICAGO_TZ)
