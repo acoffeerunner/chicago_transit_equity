@@ -81,25 +81,6 @@ def explode_routes_batched(dataset: Dataset) -> Dataset:
     new_data["route"] = []
     new_data["route_source"] = []
 
-    # #region agent log
-    import json
-    with open('/home/acoffeerunner/cta_pro_2/.cursor/debug.log', 'a') as f:
-        f.write(json.dumps({
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "C",
-            "location": "dataset_transforms.py:61",
-            "message": "explode_routes_batched_entry",
-            "data": {
-                "dataset_rows": dataset.num_rows,
-                "dataset_columns": dataset.column_names,
-                "skip_cols": list(skip_cols),
-                "output_keys": list(new_data.keys())
-            },
-            "timestamp": __import__("time").time() * 1000
-        }) + "\n")
-    # #endregion
-
     for row in dataset:
         effective_routes = row.get("effective_routes", []) or []
         own_routes = set(row.get("routes", []) or [])
@@ -119,26 +100,6 @@ def explode_routes_batched(dataset: Dataset) -> Dataset:
             new_data["route_source"].append(
                 "explicit" if route in own_routes else "inherited"
             )
-
-    # #region agent log
-    with open('/home/acoffeerunner/cta_pro_2/.cursor/debug.log', 'a') as f:
-        output_lengths = {k: len(v) for k, v in new_data.items()}
-        f.write(json.dumps({
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "C",
-            "location": "dataset_transforms.py:104",
-            "message": "explode_routes_batched_exit",
-            "data": {
-                "output_keys": list(new_data.keys()),
-                "output_lengths": output_lengths,
-                "all_lengths_equal": len(set(output_lengths.values())) == 1 if output_lengths else True,
-                "has_skip_cols_in_output": any(k in skip_cols for k in new_data.keys()),
-                "total_output_rows": max(output_lengths.values()) if output_lengths else 0
-            },
-            "timestamp": __import__("time").time() * 1000
-        }) + "\n")
-    # #endregion
 
     # Ensure skip_cols are not in output (defensive check)
     for col in skip_cols:
